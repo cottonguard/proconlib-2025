@@ -202,6 +202,9 @@ impl<T, F: FnMut(&mut T, T)> DsuMerge<T, F> {
 impl<T: Clone, F: Clone> Clone for DsuMerge<T, F> {
     fn clone(&self) -> Self {
         let mut values = Vec::<MaybeUninit<T>>::with_capacity(self.values.len());
+        unsafe {
+            values.set_len(self.len());
+        }
         for i in 0..self.len() {
             if self.is_root(i) {
                 unsafe {
