@@ -56,7 +56,7 @@ fn bisect() {
                 a[i] = x;
                 st.set(i, x);
 
-                let l = (rng.next_u32() as usize) % n;
+                let l = (rng.next_u32() as usize) % (n + 1);
                 let x = rng.next_u32() % (256 * (n - l).max(1) as u32);
                 let mut r = l;
                 let mut sum = 0;
@@ -64,7 +64,24 @@ fn bisect() {
                     sum += a[r];
                     r += 1;
                 }
-                assert_eq!(r, st.max_right(l, |&sum| sum <= x), "a={a:?}, x={x}");
+                assert_eq!(
+                    st.max_right(l, |&sum| sum <= x),
+                    (r, sum),
+                    "l={l}, a={a:?}, x={x}"
+                );
+
+                let r = l;
+                let mut l = r;
+                let mut sum = 0;
+                while l > 0 && sum + a[l - 1] <= x {
+                    l -= 1;
+                    sum += a[l];
+                }
+                assert_eq!(
+                    st.min_left(r, |&sum| sum <= x),
+                    (l, sum),
+                    "r={r}, a={a:?}, x={x}"
+                );
             }
         }
     }

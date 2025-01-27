@@ -89,29 +89,67 @@ impl<T: Monoid> SegTree<T> {
         if i >= self.a.len() { i - self.len() } else { i }
     }
 
-    pub fn max_right(&self, l: usize, mut f: impl FnMut(&T) -> bool) -> usize {
+    pub fn max_right(&self, l: usize, mut f: impl FnMut(&T) -> bool) -> (usize, T) {
+        assert!(l <= self.len());
         let mut prod = T::id();
+        if l == self.len() {
+            return (l, prod);
+        }
         let mut r = self.node_index(l);
         loop {
             r >>= r.trailing_zeros();
-            while r < self.len() {
+            loop {
                 let prod_new = prod.op(&self.a[r]);
                 if f(&prod_new) {
                     prod = prod_new;
                     r += 1;
+                    if r.count_ones() <= 1 {
+                        return (self.len(), prod);
+                    }
                     break;
+                }
+                if r >= self.len() {
+                    let r = if r >= self.len().next_power_of_two() {
+                        r - self.len().next_power_of_two()
+                    } else {
+                        r + self.len() - self.len().next_power_of_two()
+                    };
+                    return (r, prod);
                 }
                 r *= 2;
             }
-            if r >= self.len() {
-                break;
-            }
         }
+    }
 
-        if r >= self.len().next_power_of_two() {
-            r - self.len().next_power_of_two()
-        } else {
-            r - self.len().next_power_of_two() / 2
+    pub fn min_left(&self, r: usize, mut f: impl FnMut(&T) -> bool) -> (usize, T) {
+        assert!(r <= self.len());
+        let mut prod = T::id();
+        if r == 0 {
+            return (0, prod);
+        }
+        let mut l = self.node_index(r);
+        loop {
+            l = (l >> l.trailing_zeros()).max(2);
+            loop {
+                let prod_new = self.a[l - 1].op(&prod);
+                if f(&prod_new) {
+                    prod = prod_new;
+                    l -= 1;
+                    if l.count_ones() <= 1 {
+                        return (0, prod);
+                    }
+                    break;
+                }
+                if l > self.len() {
+                    let l = if l > self.len().next_power_of_two() {
+                        l - self.len().next_power_of_two()
+                    } else {
+                        l + self.len() - self.len().next_power_of_two()
+                    };
+                    return (l, prod);
+                }
+                l *= 2;
+            }
         }
     }
 }
