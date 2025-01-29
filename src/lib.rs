@@ -1,3 +1,4 @@
+pub mod aho_corasick;
 pub mod bigint;
 pub mod dsu;
 pub mod segtree;

@@ -16,8 +16,19 @@ impl Trie {
         }
     }
 
+    pub fn count_node(&self) -> usize {
+        self.nodes.len()
+    }
+
     pub fn transition(&self, i: usize, c: u8) -> Option<usize> {
         self.nodes[i].transition(c)
+    }
+
+    pub fn links(&self, i: usize) -> Links {
+        Links {
+            node: &self.nodes[i],
+            c: Some(0),
+        }
     }
 
     pub fn insert_slice(&mut self, s: &[u8]) -> (bool, usize) {
@@ -35,6 +46,7 @@ impl Trie {
                     node.set_bit(c);
                     node.edges.push(len);
                     i = len;
+                    self.nodes.push(Node::new());
                 } else {
                     let (exists, rank) = node.rank(c);
                     if !exists {
@@ -44,7 +56,7 @@ impl Trie {
                         i = len;
                         self.nodes.push(Node::new());
                     } else {
-                        i = rank;
+                        i = node.edges[rank];
                     }
                 }
             }
@@ -96,4 +108,31 @@ fn index_bit(c: u8) -> (usize, usize) {
         c as usize / Bits::BITS as usize,
         c as usize % Bits::BITS as usize,
     )
+}
+
+pub struct Links<'a> {
+    node: &'a Node,
+    c: Option<u8>,
+}
+
+impl<'a> Iterator for Links<'a> {
+    type Item = (u8, usize);
+    fn next(&mut self) -> Option<Self::Item> {
+        let Some(c) = self.c else {
+            return None;
+        };
+        let (mut q, mut r) = index_bit(c);
+        while q < 4 {
+            let bits = self.node.bits[q] & !((1 << r) - 1);
+            if bits != 0 {
+                let r = bits.trailing_zeros() as usize;
+                let c = (Bits::BITS as usize * q + r) as u8;
+                self.c = c.checked_add(1);
+                return Some((c, self.node.transition(c).unwrap()));
+            }
+            q += 1;
+            r = 0;
+        }
+        None
+    }
 }
