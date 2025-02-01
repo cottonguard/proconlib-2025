@@ -83,12 +83,6 @@ impl<T: Monoid> SegTree<T> {
         x.op(&y)
     }
 
-    #[inline]
-    fn node_index(&self, i: usize) -> usize {
-        let i = i + self.len().next_power_of_two();
-        if i >= self.a.len() { i - self.len() } else { i }
-    }
-
     pub fn max_right(&self, l: usize, mut f: impl FnMut(&T) -> bool) -> (usize, T) {
         assert!(l <= self.len());
         let mut prod = T::id();
@@ -150,6 +144,16 @@ impl<T: Monoid> SegTree<T> {
                 }
                 l *= 2;
             }
+        }
+    }
+
+    #[inline]
+    fn node_index(&self, i: usize) -> usize {
+        let i = i + self.len().next_power_of_two();
+        if i >= self.a.len() {
+            i - self.len()
+        } else {
+            i
         }
     }
 }

@@ -1,9 +1,11 @@
+#[derive(Clone)]
 pub struct Trie {
     nodes: Vec<Node>,
 }
 
 type Bits = u64;
 
+#[derive(Clone)]
 struct Node {
     bits: [Bits; 4],
     edges: Vec<usize>,
