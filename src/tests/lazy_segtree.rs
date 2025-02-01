@@ -8,15 +8,22 @@ fn range_affine_range_sum() {
             let mut a: Vec<u32> = (0..n).map(|_| rng.next_u32() % 64).collect();
             let m: Vec<M> = a.iter().map(|a| M(*a, 1)).collect();
             let mut st: LazySegTree<M, A> = m.into();
-            for _ in 0..20 {
-                let l = (rng.next_u32() as usize) % (n + 1);
-                let r = (rng.next_u32() as usize) % (n + 1);
-                let (l, r) = if l <= r { (l, r) } else { (r, l) };
-                let f = A(rng.next_u32() % 8, rng.next_u32() % 64);
-                for i in l..r {
-                    a[i] = f.map(&M(a[i], 1)).0;
+            for it in 0..20 {
+                if it % 5 == 0 {
+                    let i = (rng.next_u32() as usize) % n;
+                    let x = rng.next_u32() % 64;
+                    assert_eq!(st.set(i, M(x, 1)).0, a[i]);
+                    a[i] = x;
+                } else {
+                    let l = (rng.next_u32() as usize) % (n + 1);
+                    let r = (rng.next_u32() as usize) % (n + 1);
+                    let (l, r) = if l <= r { (l, r) } else { (r, l) };
+                    let f = A(rng.next_u32() % 8, rng.next_u32() % 64);
+                    for i in l..r {
+                        a[i] = f.map(&M(a[i], 1)).0;
+                    }
+                    st.apply(l..r, f);
                 }
-                st.apply(l..r, f);
 
                 let l = (rng.next_u32() as usize) % (n + 1);
                 let r = (rng.next_u32() as usize) % (n + 1);

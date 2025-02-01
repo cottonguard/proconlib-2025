@@ -1,4 +1,7 @@
-use std::ops::{Bound, Deref, RangeBounds};
+use std::{
+    mem,
+    ops::{Bound, Deref, RangeBounds},
+};
 
 pub trait Monoid {
     fn id() -> Self;
@@ -16,14 +19,14 @@ impl<T: Monoid> SegTree<T> {
         }
     }
 
-    pub fn set(&mut self, i: usize, x: T) {
+    pub fn set(&mut self, i: usize, x: T) -> T {
         assert!(
             i < self.len(),
             "out of range (len = {}, index = {i})",
             self.len()
         );
         let mut i = self.node_index(i);
-        self.a[i] = x;
+        let orig = mem::replace(&mut self.a[i], x);
         loop {
             i /= 2;
             if i == 0 {
@@ -31,6 +34,7 @@ impl<T: Monoid> SegTree<T> {
             }
             self.a[i] = self.a[2 * i].op(&self.a[2 * i + 1]);
         }
+        orig
     }
 
     pub fn prod(&self, range: impl RangeBounds<usize>) -> T {

@@ -1,4 +1,7 @@
-use std::ops::{Bound, RangeBounds};
+use std::{
+    mem,
+    ops::{Bound, RangeBounds},
+};
 
 pub trait Monoid {
     fn id() -> Self;
@@ -143,6 +146,20 @@ impl<T: Monoid, M: Map<T>> LazySegTree<T, M> {
             self.value[p] = self.value[2 * p].op(&self.value[2 * p + 1]);
             p /= 2;
         }
+    }
+
+    pub fn set(&mut self, i: usize, value: T) -> T {
+        let mut i = self.node_index(i);
+        for e in (1..=i.ilog2()).rev() {
+            self.propagate(i >> e);
+        }
+        let orig = mem::replace(&mut self.value[i], value);
+        i /= 2;
+        while i >= 1 {
+            self.value[i] = self.value[2 * i].op(&self.value[2 * i + 1]);
+            i /= 2;
+        }
+        orig
     }
 
     #[inline]
