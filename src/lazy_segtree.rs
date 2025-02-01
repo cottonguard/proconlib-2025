@@ -21,6 +21,13 @@ pub struct LazySegTree<T, M> {
 }
 
 impl<T: Monoid, M: Map<T>> LazySegTree<T, M> {
+    pub fn new(n: usize) -> Self {
+        Self {
+            value: (0..2 * n).map(|_| T::id()).collect(),
+            map: (0..n).map(|_| M::id()).collect(),
+        }
+    }
+
     fn len(&self) -> usize {
         self.value.len() / 2
     }
@@ -145,6 +152,16 @@ impl<T: Monoid, M: Map<T>> LazySegTree<T, M> {
         while p > 0 {
             self.value[p] = self.value[2 * p].op(&self.value[2 * p + 1]);
             p /= 2;
+        }
+    }
+
+    pub fn get(&self, i: usize) {
+        let mut i = self.node_index(i);
+        let mut x = self.value[i].op(&T::id());
+        i /= 2;
+        while i >= 1 {
+            x = self.map[i].map(&x);
+            i /= 2;
         }
     }
 
