@@ -1,18 +1,24 @@
-pub struct MontgomeryReduction<T> {
-    n: T,
-    ninv: T,
-    r2: T,
+pub struct Montgomery<T> {
+    pub n: T,
+    pub ninv: T,
+    pub r: T,
+    pub r2: T,
 }
 
 macro_rules! impls {
     ($uty:ident, $ity:ident, $uwide:ident) => {
-        impl MontgomeryReduction<$uty> {
+        impl Montgomery<$uty> {
             #[inline]
             pub fn new(n: $uty) -> Self {
                 let ninv = Self::inv(n);
-                let rmodn = (n.wrapping_neg() % n) as $uwide;
-                let r2 = ((rmodn * rmodn) % n as $uwide) as $uty;
-                Self { n, ninv, r2 }
+                let r = n.wrapping_neg() % n;
+                let r2 = ((r as $uwide * r as $uwide) % n as $uwide) as $uty;
+                Self { n, ninv, r, r2 }
+            }
+
+            #[inline]
+            pub fn modulo(&self) -> $uty {
+                self.n
             }
 
             /// <https://cp-algorithms.com/algebra/montgomery_multiplication.html#fast-inverse-trick>
@@ -46,7 +52,6 @@ macro_rules! impls {
 
             #[inline]
             pub fn mul(&self, x: $uty, y: $uty) -> $uty {
-                // self.redc(self.redc(self.mul_r(x) as $uwide * self.mul_r(y) as $uwide) as $uwide)
                 self.redc(self.mul_r(x) as $uwide * y as $uwide)
             }
         }

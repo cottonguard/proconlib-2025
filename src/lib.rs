@@ -2,6 +2,7 @@ pub mod aho_corasick;
 pub mod bigint;
 pub mod bitset;
 pub mod dsu;
+pub mod factorize;
 pub mod lazy_segtree;
 pub mod montgomery;
 pub mod segtree;
