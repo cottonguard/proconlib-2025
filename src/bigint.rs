@@ -72,6 +72,27 @@ fn sub_from(x: &mut [Digit], y: &[Digit]) -> bool {
 }
 
 #[inline]
+fn add_write(x: &[Digit], y: &[Digit], dst: &mut [Digit]) -> bool {
+    let (x, y) = if x.len() >= y.len() { (x, y) } else { (y, x) };
+    let mut carry = false;
+    for i in 0..y.len().min(dst.len()) {
+        dst[i] = x[i];
+        let (of1, of2);
+        (dst[i], of1) = dst[i].overflowing_add(y[i]);
+        (dst[i], of2) = dst[i].overflowing_add(carry as Digit);
+        carry = of1 | of2;
+    }
+
+    for i in y.len()..x.len().min(dst.len()) {
+        if !carry {
+            break;
+        }
+        (dst[i], carry) = x[i].overflowing_add(carry as Digit);
+    }
+    carry
+}
+
+#[inline]
 fn long_fma(x: &[Digit], y: &[Digit], dst: &mut [Digit]) {
     for i in 0..x.len().min(dst.len()) {
         let mut carry = false;

@@ -4,6 +4,7 @@ pub mod bitset;
 pub mod dsu;
 pub mod factorize;
 pub mod lazy_segtree;
+pub mod max_frow;
 pub mod montgomery;
 pub mod segtree;
 pub mod simple_rng;
