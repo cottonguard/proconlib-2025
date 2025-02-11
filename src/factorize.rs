@@ -1,12 +1,28 @@
 use crate::montgomery::Montgomery;
 
 pub fn factorize(mut n: u64) -> Vec<u64> {
-    let mut res = vec![];
-    while n % 2 == 0 {
-        n /= 2;
-        res.push(2);
+    assert_ne!(n, 0);
+    if n == 1 {
+        return vec![];
     }
-    factorize_rec(n, &mut res);
+    let mut res = vec![];
+    let mut naive = |p: u64| {
+        while n % p == 0 {
+            n /= p;
+            res.push(p);
+        }
+    };
+    naive(2);
+    naive(3);
+    naive(5);
+    naive(7);
+    naive(11);
+    naive(13);
+    naive(17);
+    naive(23);
+    if n != 1 {
+        factorize_rec(n, &mut res);
+    }
     res
 }
 
@@ -22,6 +38,7 @@ fn factorize_rec(n: u64, res: &mut Vec<u64>) {
     }
 }
 
+#[inline]
 fn is_prime(m: &Montgomery<u64>) -> bool {
     if m.n % 2 == 0 {
         return if m.n == 2 { true } else { false };
@@ -34,6 +51,7 @@ fn is_prime(m: &Montgomery<u64>) -> bool {
     a.iter().all(|&a| a >= m.n || miller_rabin(a, m))
 }
 
+#[inline]
 fn miller_rabin(a: u64, m: &Montgomery<u64>) -> bool {
     let s = (m.n - 1).trailing_zeros();
     let d = (m.n - 1) >> s;
@@ -52,6 +70,7 @@ fn miller_rabin(a: u64, m: &Montgomery<u64>) -> bool {
     false
 }
 
+#[inline]
 fn mod_pow(n: u64, mut e: u64, m: &Montgomery<u64>) -> u64 {
     if e == 0 {
         return 1;
@@ -68,6 +87,7 @@ fn mod_pow(n: u64, mut e: u64, m: &Montgomery<u64>) -> u64 {
     acc
 }
 
+#[inline]
 fn rho(m: &Montgomery<u64>) -> u64 {
     for i in 1..m.n {
         for j in 2..m.n {
