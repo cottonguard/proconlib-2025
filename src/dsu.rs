@@ -99,7 +99,7 @@ pub struct Comps<'a> {
     j: usize,
 }
 
-impl<'a> Iterator for Comps<'a> {
+impl Iterator for Comps<'_> {
     type Item = Comp;
     fn next(&mut self) -> Option<Self::Item> {
         while self.i < self.j {
@@ -162,7 +162,7 @@ impl<T, F> DsuMerge<T, F> {
     pub fn comps(&self) -> MergeComps<T> {
         MergeComps {
             comps: self.dsu.comps(),
-            values: &*self.values,
+            values: &self.values,
         }
     }
 }
@@ -205,10 +205,10 @@ impl<T: Clone, F: Clone> Clone for DsuMerge<T, F> {
         unsafe {
             values.set_len(self.len());
         }
-        for i in 0..self.len() {
+        for (i, value) in values.iter_mut().enumerate() {
             if self.is_root(i) {
                 unsafe {
-                    values[i].write(self.values[i].assume_init_ref().clone());
+                    value.write(self.values[i].assume_init_ref().clone());
                 }
             }
         }

@@ -67,6 +67,12 @@ impl Trie {
     }
 }
 
+impl Default for Trie {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Node {
     fn new() -> Self {
         Self {
@@ -117,12 +123,10 @@ pub struct Links<'a> {
     c: Option<u8>,
 }
 
-impl<'a> Iterator for Links<'a> {
+impl Iterator for Links<'_> {
     type Item = (u8, usize);
     fn next(&mut self) -> Option<Self::Item> {
-        let Some(c) = self.c else {
-            return None;
-        };
+        let c = self.c?;
         let (mut q, mut r) = index_bit(c);
         while q < 4 {
             let bits = self.node.bits[q] & !((1 << r) - 1);

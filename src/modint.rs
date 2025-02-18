@@ -27,16 +27,17 @@ impl<const M: u32> ModInt<M> {
     }
     pub fn inv(self) -> Self {
         use std::mem::swap;
+        assert_ne!(self, ModInt(0));
         let mut x = self.0 as i32;
         let mut y = M as i32;
         let mut a = (1, 0);
         let mut b = (0, 1);
         while y != 0 {
             let d = x / y;
-            x = x % y;
+            x %= y;
             swap(&mut x, &mut y);
-            a.0 = a.0 - d * b.0;
-            a.1 = a.1 - d * b.1;
+            a.0 -= d * b.0;
+            a.1 -= d * b.1;
             swap(&mut a, &mut b);
         }
         debug_assert_eq!(x, 1, "{} (mod {}) does not have inverse", self.0, M);
@@ -76,7 +77,7 @@ impl<const M: u32> ModInt<M> {
         }
         panic!("not found primitive root");
     }
-    const fn pow_const(self, mut exp: u32) -> Self {
+    pub(crate) const fn pow_const(self, mut exp: u32) -> Self {
         if exp == 0 {
             return Self(1);
         }
@@ -84,14 +85,17 @@ impl<const M: u32> ModInt<M> {
         let mut acc = Self(1);
         loop {
             if exp % 2 == 1 {
-                acc = Self((acc.0 as u64 * base.0 as u64 % M as u64) as u32);
+                acc = acc.mul_const(base);
                 if exp == 1 {
                     return acc;
                 }
             }
-            base = Self((base.0 as u64 * base.0 as u64 % M as u64) as u32);
+            base = base.mul_const(base);
             exp /= 2;
         }
+    }
+    pub(crate) const fn mul_const(self, other: Self) -> Self {
+        Self((self.0 as u64 * other.0 as u64 % M as u64) as u32)
     }
 }
 
@@ -134,6 +138,7 @@ impl<const M: u32> Mul for ModInt<M> {
 
 impl<const M: u32> Div for ModInt<M> {
     type Output = Self;
+    #[allow(clippy::suspicious_arithmetic_impl)]
     fn div(self, other: Self) -> Self::Output {
         self * other.inv()
     }
@@ -207,7 +212,7 @@ macro_rules! pow {
                 if exp < 0 {
                     self = self.inv();
                 }
-                self.pow(exp.abs() as $ty)
+                self.pow(exp.unsigned_abs())
             }
         }
     };

@@ -41,7 +41,7 @@ fn factorize_rec(n: u64, res: &mut Vec<u64>) {
 #[inline]
 fn is_prime(m: &Montgomery<u64>) -> bool {
     if m.n % 2 == 0 {
-        return if m.n == 2 { true } else { false };
+        return m.n == 2;
     }
     let a: &[u64] = if m.n < 4759123141 {
         &[2, 7, 61]

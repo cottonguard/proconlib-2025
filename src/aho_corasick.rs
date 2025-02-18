@@ -45,10 +45,7 @@ impl AhoCorasick {
             if let Some(j) = self.trie.transition(i, c) {
                 return Some(j);
             }
-            let Some(i_) = self.suffix(i) else {
-                return None;
-            };
-            i = i_;
+            i = self.suffix(i)?;
         }
     }
 

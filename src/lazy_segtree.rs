@@ -235,8 +235,7 @@ impl<T: Monoid, M: Map<T>> From<Vec<T>> for LazySegTree<T, M> {
                 .copy_to_nonoverlapping(ptr.add(n.next_power_of_two() - r), r);
             ptr.copy_to_nonoverlapping(ptr.add(n.next_power_of_two()), l);
             for i in (1..n).rev() {
-                ptr.add(i)
-                    .write((&*ptr.add(2 * i)).op(&*ptr.add(2 * i + 1)));
+                ptr.add(i).write((*ptr.add(2 * i)).op(&*ptr.add(2 * i + 1)));
             }
             ptr.write(T::id());
             value.set_len(2 * n);

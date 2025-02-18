@@ -88,7 +88,7 @@ struct Run<'a, T> {
     t: Idx,
 }
 
-impl<'a, T: Flow> Run<'a, T> {
+impl<T: Flow> Run<'_, T> {
     fn run(&mut self, s: usize, t: usize, limit: Option<T>) -> T {
         let mut total = T::ZERO;
         let mut que = VecDeque::new();
@@ -142,7 +142,7 @@ impl<'a, T: Flow> Run<'a, T> {
     fn dfs(&mut self, u: usize) -> T {
         while self.next_edge[u] != NIL {
             let Edge { next, v, cap } = self.edges[self.next_edge[u] as usize];
-            if cap > T::ZERO && self.dist[u as usize] + 1 == self.dist[v as usize] {
+            if cap > T::ZERO && self.dist[u] + 1 == self.dist[v as usize] {
                 if v == self.t {
                     return cap;
                 }
