@@ -24,7 +24,6 @@ impl TwoSat {
         let g = self.g.build();
         let n = g.num_vert() / 2;
         let scc = scc(g.num_vert(), |u| g.adj(u));
-        dbg!(&scc);
         let mut res = vec![false; n];
         for (i, res) in res.iter_mut().enumerate() {
             let f = 2 * i;

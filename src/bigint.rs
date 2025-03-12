@@ -113,3 +113,7 @@ fn long_fma(x: &[Digit], y: &[Digit], dst: &mut [Digit]) {
         }
     }
 }
+
+fn toom3() {
+    
+}

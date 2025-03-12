@@ -1,8 +1,11 @@
 mod aho_corasick;
 mod bitset;
+mod cartesian_tree;
+mod cht;
 mod dsu;
 mod factorize;
 mod lazy_segtree;
+mod matrix;
 mod max_flow;
 mod modint;
 mod montgomery;
