@@ -112,9 +112,7 @@ where
 
     let sa_lms = sa_is(&lms_s, ch);
 
-    for sa in &mut sa {
-        *sa = !0;
-    }
+    sa.fill(!0);
     let mut lms_end = end.clone();
     for &j in sa_lms.iter().rev() {
         let i = from_lms[j];

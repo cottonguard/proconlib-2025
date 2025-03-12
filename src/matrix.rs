@@ -266,7 +266,10 @@ impl<T: Scalar, const N: usize, const M: usize> Matrix<T> for [[T; M]; N] {
     }
     fn row2_mut(&mut self, i1: usize, i2: usize) -> (&mut [T], &mut [T]) {
         assert_ne!(i1, i2);
-        unsafe { (&mut *&raw mut self[i1], &mut *&raw mut self[i2]) }
+        #[allow(clippy::deref_addrof)]
+        unsafe {
+            (&mut *&raw mut self[i1], &mut *&raw mut self[i2])
+        }
     }
 }
 
@@ -295,7 +298,7 @@ impl<T> MatBuf<T> {
     pub fn as_flattened(&self) -> &[T] {
         unsafe { slice::from_raw_parts(self.ptr, self.header().n * self.header().m) }
     }
-    pub fn as_flattened_mut(&self) -> &mut [T] {
+    pub fn as_flattened_mut(&mut self) -> &mut [T] {
         unsafe { slice::from_raw_parts_mut(self.ptr, self.header().n * self.header().m) }
     }
 }
@@ -363,7 +366,8 @@ impl<T: Scalar> Matrix<T> for MatBuf<T> {
         &self[i]
     }
     fn row_mut(&mut self, i: usize) -> &mut [T] {
-        &mut self.as_flattened_mut()[i * self.m()..(i + 1) * self.m()]
+        let range = i * self.m()..(i + 1) * self.m();
+        &mut self.as_flattened_mut()[range]
     }
     fn row2_mut(&mut self, i1: usize, i2: usize) -> (&mut [T], &mut [T]) {
         assert_ne!(i1, i2);

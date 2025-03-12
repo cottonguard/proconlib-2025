@@ -45,6 +45,7 @@ int!(i64, i128);
 float!(f32);
 float!(f64);
 
+#[derive(Default, Debug)]
 pub struct Cht<T> {
     lines: Vec<Line<T>>,
 }
