@@ -48,6 +48,14 @@ impl Rng {
     pub fn range<T: Range>(&mut self, range: impl RangeBounds<T>) -> T {
         T::range(self, range)
     }
+
+    #[inline]
+    pub fn shuffle<T>(&mut self, slice: &mut [T]) {
+        for j in (1..slice.len()).rev() {
+            let i = self.range(..=j);
+            slice.swap(i, j);
+        }
+    }
 }
 
 pub trait Random {
@@ -105,31 +113,29 @@ random_signed!(i64, u64);
 macro_rules! range {
     ($ty:ident, $uty:ident, $uwide:ident) => {
         impl Range for $ty {
+            #[inline]
             fn range(rng: &mut Rng, range: impl RangeBounds<Self>) -> Self {
                 let l = match range.start_bound() {
                     Bound::Included(&l) => l,
                     Bound::Excluded(&l) => l + 1,
                     Bound::Unbounded => $ty::MIN,
                 };
-                let Some(r) = (match range.end_bound() {
-                    Bound::Included(&r) if r < $ty::MAX => (r + 1).checked_sub(l),
-                    Bound::Excluded(&r) => r.checked_sub(l),
-                    _ => {
-                        if l == $ty::MIN {
-                            return Self::random(rng);
-                        }
-                        Some($ty::MIN.wrapping_sub(l))
-                    }
-                }) else {
-                    panic!(
-                        "invalid range ({:?}, {:?})",
-                        range.start_bound(),
-                        range.end_bound()
-                    )
+                let r = match range.end_bound() {
+                    Bound::Included(&r) => r.wrapping_add(1),
+                    Bound::Excluded(&r) => r,
+                    Bound::Unbounded => $ty::MAX.wrapping_add(1),
                 };
 
+                assert!(
+                    l <= r.wrapping_sub(1),
+                    "invalid range ({:?}, {:?})",
+                    range.start_bound(),
+                    range.end_bound()
+                );
+
+                let d = r.wrapping_sub(l) as $uty;
                 l.wrapping_add(
-                    (($uty::random(rng) as $uwide * r as $uty as $uwide) >> $uty::BITS) as $ty,
+                    (($uty::random(rng) as $uwide * d as $uty as $uwide) >> $uty::BITS) as $ty,
                 )
             }
         }
